@@ -2,41 +2,55 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DBHelper {
-  static Database? _db;
+  static Database? _database;
 
-  static Future<Database> getDB() async {
-    if (_db != null) return _db!;
+  // 🔹 Get database
+  static Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB();
+    return _database!;
+  }
 
-    _db = await openDatabase(
-      join(await getDatabasesPath(), 'nfc_data.db'),
+  // 🔹 Initialize DB
+  static Future<Database> _initDB() async {
+    String path = join(await getDatabasesPath(), 'nfc_tags.db');
+
+    return await openDatabase(
+      path,
+      version: 1,
       onCreate: (db, version) async {
         await db.execute('''
-          CREATE TABLE nfc_tags(
+          CREATE TABLE tags(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tagId TEXT,
-            payload TEXT
+            data TEXT,
+            createdAt TEXT
           )
         ''');
       },
-      version: 1,
     );
-
-    return _db!;
   }
 
-  // INSERT
-  static Future<void> insertTag(String tagId, String payload) async {
-    final db = await getDB();
+  // 🔹 Insert tag
+  static Future<void> insertTag(String tagId, String data) async {
+    final db = await database;
 
-    await db.insert('nfc_tags', {
+    await db.insert('tags', {
       'tagId': tagId,
-      'payload': payload,
+      'data': data,
+      'createdAt': DateTime.now().toString(),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // READ ALL
+  // 🔹 Get all tags
   static Future<List<Map<String, dynamic>>> getTags() async {
-    final db = await getDB();
-    return db.query('nfc_tags');
+    final db = await database;
+    return await db.query('tags', orderBy: 'id DESC');
+  }
+
+  // 🔹 Delete tag
+  static Future<void> deleteTag(int id) async {
+    final db = await database;
+    await db.delete('tags', where: 'id = ?', whereArgs: [id]);
   }
 }
