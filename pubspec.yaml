@@ -37,6 +37,7 @@ dependencies:
   nfc_manager: ^3.3.0
   contacts_service_plus: ^0.0.2
   permission_handler: ^12.0.1
+  flutter_launcher_icons: ^0.10.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -53,6 +54,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+flutter_icons:   # <--- also here, at same top level
+  android: true
+  ios: true
+  image_path: "lib/assets/nfc.png"
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -63,6 +69,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - lib\assets\nfc.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
