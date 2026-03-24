@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'write_url_screen.dart';
 import 'write_text_screen.dart';
+import 'write_phone_screen.dart';
 import 'write_contact_screen.dart';
 import 'write_wifi_screen.dart';
 import 'record_selection_screen.dart';
@@ -65,6 +66,8 @@ class _WriteScreenState extends State<WriteScreen> {
                 ndefRecords.add(NdefRecord.createUri(Uri.parse(rec['data'])));
               } else if (rec['type'] == 'WiFi' || rec['type'] == 'Contact') {
                 ndefRecords.add(NdefRecord.createText(rec['fullData']));
+              } else if (rec['type'] == 'Phone') {
+                ndefRecords.add(NdefRecord.createUri(Uri.parse(rec['fullData'])));
               }
             }
 
@@ -255,7 +258,8 @@ class _WriteScreenState extends State<WriteScreen> {
     switch (rec['type']) {
       case 'URL': icon = Icons.link_rounded; break;
       case 'Text': icon = Icons.text_fields_rounded; break;
-      case 'Contact': icon = Icons.person_search_rounded; break;
+      case 'Contact': icon = Icons.person_rounded; break;
+      case 'Phone': icon = Icons.phone_rounded; break;
       case 'WiFi': icon = Icons.wifi_password_rounded; break;
       default: icon = Icons.token_rounded;
     }
@@ -286,7 +290,7 @@ class _WriteScreenState extends State<WriteScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  rec['type'].toString().toUpperCase(),
+                  (rec['type'] == 'Phone' ? 'Phone Number' : rec['type']).toString().toUpperCase(),
                   style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2.0),
                 ),
                 Text(
@@ -336,7 +340,7 @@ class _WriteScreenState extends State<WriteScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Type: ${record['type']}", style: const TextStyle(color: Colors.white70)),
+            Text("Type: ${record['type'] == 'Phone' ? 'Phone Number' : record['type']}", style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 8),
             Text("Data: ${record['data']}", style: const TextStyle(color: Color(0xFF38BDF8))),
           ],

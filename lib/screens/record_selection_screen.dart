@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'write_url_screen.dart';
 import 'write_text_screen.dart';
-import 'write_contact_screen.dart';
+import 'write_phone_screen.dart';
 import 'write_wifi_screen.dart';
+import 'write_contact_screen.dart';
 
 class RecordSelectionScreen extends StatelessWidget {
   const RecordSelectionScreen({super.key});
@@ -61,12 +62,12 @@ class RecordSelectionScreen extends StatelessWidget {
                   _buildSelectionCard(
                     context,
                     icon: Icons.contact_phone,
-                    title: 'Contact',
-                    subtitle: 'vCard contact info',
+                    title: 'Phone Number',
+                    subtitle: 'Save a mobile number',
                     onTap: () async {
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const WriteContactScreen(isAddingRecord: true)),
+                        MaterialPageRoute(builder: (_) => const WritePhoneScreen(isAddingRecord: true)),
                       );
                       if (context.mounted && result != null) Navigator.pop(context, result);
                     },
@@ -81,6 +82,20 @@ class RecordSelectionScreen extends StatelessWidget {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const WriteWifiScreen(isAddingRecord: true)),
+                      );
+                      if (context.mounted && result != null) Navigator.pop(context, result);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildSelectionCard(
+                    context,
+                    icon: Icons.person_add_alt_1_rounded,
+                    title: 'Contact',
+                    subtitle: 'vCard (Name, Org, Address...)',
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const WriteContactScreen(isAddingRecord: true)),
                       );
                       if (context.mounted && result != null) Navigator.pop(context, result);
                     },
