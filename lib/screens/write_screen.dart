@@ -6,6 +6,7 @@ import 'write_phone_screen.dart';
 import 'write_contact_screen.dart';
 import 'write_wifi_screen.dart';
 import 'record_selection_screen.dart';
+import 'dart:typed_data';
 
 class WriteScreen extends StatefulWidget {
   const WriteScreen({super.key});
@@ -40,11 +41,61 @@ class _WriteScreenState extends State<WriteScreen> {
 
     setState(() => _isWriting = true);
 
+    // Show a bottom sheet or dialog to indicate that the phone is ready to write
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              const Icon(Icons.contactless_outlined, size: 80, color: Color(0xFF38BDF8)),
+              const SizedBox(height: 24),
+              const Text(
+                "READY TO WRITE",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "Approach an NFC Tag to start writing.",
+                style: TextStyle(color: Colors.white54, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () async {
+                    await NfcManager.instance.stopSession();
+                    if (mounted) {
+                      Navigator.pop(context);
+                      setState(() => _isWriting = false);
+                    }
+                  },
+                  child: const Text("CANCEL", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
     try {
       bool isAvailable = await NfcManager.instance.isAvailable();
       if (!isAvailable) {
+        if (mounted) Navigator.pop(context); // Close bottom sheet
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("NFC not available")),
+          const SnackBar(content: Text("NFC not available on this device")),
         );
         setState(() => _isWriting = false);
         return;
@@ -55,38 +106,59 @@ class _WriteScreenState extends State<WriteScreen> {
           try {
             final ndef = Ndef.from(tag);
             if (ndef == null || !ndef.isWritable) {
-              throw Exception("Tag not writable");
+              throw Exception("Tag is not writable or doesn't support NDEF");
             }
 
             List<NdefRecord> ndefRecords = [];
             for (var rec in _records) {
-              if (rec['type'] == 'Text') {
-                ndefRecords.add(NdefRecord.createText(rec['data']));
-              } else if (rec['type'] == 'URL') {
-                ndefRecords.add(NdefRecord.createUri(Uri.parse(rec['data'])));
-              } else if (rec['type'] == 'WiFi' || rec['type'] == 'Contact') {
-                ndefRecords.add(NdefRecord.createText(rec['fullData']));
-              } else if (rec['type'] == 'Phone') {
-                ndefRecords.add(NdefRecord.createUri(Uri.parse(rec['fullData'])));
+              final type = rec['type'];
+              final data = rec['data'];
+              final fullData = rec['fullData'] ?? data;
+
+              if (type == 'Text') {
+                ndefRecords.add(NdefRecord.createText(data));
+              } else if (type == 'URL') {
+                ndefRecords.add(NdefRecord.createUri(Uri.parse(fullData)));
+              } else if (type == 'Phone') {
+                ndefRecords.add(NdefRecord.createUri(Uri.parse(fullData)));
+              } else if (type == 'WiFi') {
+                if (rec.containsKey('payload')) {
+                  ndefRecords.add(NdefRecord.createMime('application/vnd.wfa.wsc', rec['payload'] as Uint8List));
+                } else {
+                  ndefRecords.add(NdefRecord.createText(fullData));
+                }
+              } else if (type == 'Contact') {
+                // vCard format - use MIME type for universal native support
+                ndefRecords.add(NdefRecord.createMime('text/vcard', Uint8List.fromList(fullData.codeUnits)));
               }
             }
 
             await ndef.write(NdefMessage(ndefRecords));
             await NfcManager.instance.stopSession();
-            setState(() => _isWriting = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("✅ Successfully written to tag!")),
-            );
+
+            if (mounted) {
+              Navigator.pop(context); // Close bottom sheet
+              setState(() => _isWriting = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text("✅ Successfully written to NFC tag!"),
+                    backgroundColor: Colors.green),
+              );
+            }
           } catch (e) {
             await NfcManager.instance.stopSession(errorMessage: e.toString());
-            setState(() => _isWriting = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("❌ Error: $e")),
-            );
+            if (mounted) {
+              Navigator.pop(context); // Close bottom sheet
+              setState(() => _isWriting = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("❌ Error: $e"), backgroundColor: Colors.redAccent),
+              );
+            }
           }
         },
       );
     } catch (e) {
+      if (mounted) Navigator.pop(context); // Close bottom sheet
       setState(() => _isWriting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("❌ Error starting NFC: $e")),
@@ -326,41 +398,8 @@ class _WriteScreenState extends State<WriteScreen> {
     );
 
     if (result != null && mounted) {
-      _confirmAddRecord(context, result as Map<String, dynamic>);
+      _addRecord(result as Map<String, dynamic>);
     }
-  }
-
-  void _confirmAddRecord(BuildContext context, Map<String, dynamic> record) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        title: const Text("Confirm Record", style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Type: ${record['type'] == 'Phone' ? 'Phone Number' : record['type']}", style: const TextStyle(color: Colors.white70)),
-            const SizedBox(height: 8),
-            Text("Data: ${record['data']}", style: const TextStyle(color: Color(0xFF38BDF8))),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: Colors.redAccent)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _addRecord(record);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF38BDF8)),
-            child: const Text("OK", style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildModalOption({required IconData icon, required String title, required VoidCallback onTap}) {

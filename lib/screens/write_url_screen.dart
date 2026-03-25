@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 
 class WriteUrlScreen extends StatefulWidget {
@@ -44,7 +43,8 @@ class _WriteUrlScreenState extends State<WriteUrlScreen> {
     if (widget.isAddingRecord) {
       Navigator.pop(context, {
         'type': 'URL',
-        'data': fullUrl,
+        'data': _urlController.text.trim(),
+        'fullData': fullUrl,
         'size': fullUrl.length + 1, // Basic approximation
       });
       return;

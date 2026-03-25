@@ -83,7 +83,9 @@ class RecordSelectionScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(builder: (_) => const WriteWifiScreen(isAddingRecord: true)),
                       );
-                      if (context.mounted && result != null) Navigator.pop(context, result);
+                      if (context.mounted && result != null) {
+                        Navigator.pop(context, result);
+                      }
                     },
                   ),
                   const SizedBox(height: 16),

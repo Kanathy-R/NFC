@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
 import 'package:contacts_service_plus/contacts_service_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:typed_data';
 
 class WriteContactScreen extends StatefulWidget {
   final bool isAddingRecord;
@@ -106,7 +107,8 @@ class _WriteContactScreenState extends State<WriteContactScreen> {
           if (ndef == null) throw Exception("NDEF not supported on this tag");
           if (!ndef.isWritable) throw Exception("Tag is not writable");
 
-          final message = NdefMessage([NdefRecord.createText(vCard)]);
+          final vCardBytes = Uint8List.fromList(vCard.codeUnits);
+          final message = NdefMessage([NdefRecord.createMime('text/vcard', vCardBytes)]);
 
           await ndef.write(message);
           await NfcManager.instance.stopSession();

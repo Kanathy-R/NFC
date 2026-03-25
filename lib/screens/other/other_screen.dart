@@ -3,10 +3,8 @@ import 'copy_tag_screen.dart';
 import 'erase_tag_screen.dart';
 import 'lock_tag_screen.dart';
 import 'read_memory_screen.dart';
-import 'format_memory_screen.dart';
-import 'set_password_screen.dart';
-import 'remove_password_screen.dart';
-import 'advanced_nfc_screen.dart';
+import 'lock_tag_screen.dart';
+import 'read_memory_screen.dart';
 
 class OtherScreen extends StatelessWidget {
   const OtherScreen({super.key});
@@ -37,30 +35,6 @@ class OtherScreen extends StatelessWidget {
         'icon': Icons.layers_outlined,
         'color': const Color(0xFF34D399),
         'screen': const ReadMemoryScreen(),
-      },
-      {
-        'title': 'Format memory',
-        'icon': Icons.storage,
-        'color': const Color(0xFFA78BFA),
-        'screen': const FormatMemoryScreen(),
-      },
-      {
-        'title': 'Set password',
-        'icon': Icons.vpn_key_outlined,
-        'color': const Color(0xFFFB923C),
-        'screen': const SetPasswordScreen(),
-      },
-      {
-        'title': 'Remove password',
-        'icon': Icons.no_encryption_outlined,
-        'color': const Color(0xFFF87171),
-        'screen': const RemovePasswordScreen(),
-      },
-      {
-        'title': 'Advanced NFC commands',
-        'icon': Icons.memory,
-        'color': const Color(0xFF9CA3AF),
-        'screen': const AdvancedNfcScreen(),
       },
     ];
 
