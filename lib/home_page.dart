@@ -37,25 +37,6 @@ class _HomePageState extends State<HomePage> {
             color: Colors.white,
           ),
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu_rounded, color: Colors.white70),
-            onPressed: () {},
-          ),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.settings_outlined, color: Colors.white70, size: 20),
-              onPressed: () {},
-            ),
-          ),
-        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -73,43 +54,49 @@ class _HomePageState extends State<HomePage> {
           child: _screens[_currentIndex],
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 80,
-        margin: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E293B).withOpacity(0.9),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: const Color(0xFF38BDF8).withOpacity(0.05),
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            currentIndex: _currentIndex,
-            onTap: (index) => setState(() => _currentIndex = index),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white30,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            showUnselectedLabels: false,
-            type: BottomNavigationBarType.fixed,
-            items: [
-              _buildNavItem(Icons.sensors_rounded, 'READ', 0),
-              _buildNavItem(Icons.auto_awesome_mosaic_rounded, 'WRITE', 1),
-              _buildNavItem(Icons.grid_view_rounded, 'OTHER', 2),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        child: Container(
+          height: 76,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B).withOpacity(0.9),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+              BoxShadow(
+                color: const Color(0xFF38BDF8).withOpacity(0.05),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              currentIndex: _currentIndex,
+              onTap: (index) => setState(() => _currentIndex = index),
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white30,
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              unselectedLabelStyle: const TextStyle(fontSize: 11),
+              showUnselectedLabels: true,
+              selectedFontSize: 12,
+              unselectedFontSize: 11,
+              type: BottomNavigationBarType.fixed,
+              items: [
+                _buildNavItem(Icons.sensors_rounded, 'READ', 0),
+                _buildNavItem(Icons.auto_awesome_mosaic_rounded, 'WRITE', 1),
+                _buildNavItem(Icons.grid_view_rounded, 'OTHER', 2),
+              ],
+            ),
           ),
         ),
       ),

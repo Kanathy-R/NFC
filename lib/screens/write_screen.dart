@@ -201,17 +201,19 @@ class _WriteScreenState extends State<WriteScreen> {
                   isGlass: true,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildPrimaryAction(
-                  icon: Icons.flash_on_rounded,
-                  label: "WRITE TAG",
-                  color: const Color(0xFF6366F1),
-                  textColor: Colors.white,
-                  onTap: _isWriting ? null : _writeAllToNfc,
-                  isGlass: true,
+              if (_records.isNotEmpty) ...[
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildPrimaryAction(
+                    icon: Icons.flash_on_rounded,
+                    label: "WRITE TAG",
+                    color: const Color(0xFF6366F1),
+                    textColor: Colors.white,
+                    onTap: _isWriting ? null : _writeAllToNfc,
+                    isGlass: true,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: 24),

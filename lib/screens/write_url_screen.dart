@@ -26,6 +26,14 @@ class _WriteUrlScreenState extends State<WriteUrlScreen> {
   String _selectedProtocol = 'https://';
   bool _isWriting = false;
 
+  String _stripTypedScheme(String input) {
+    final value = input.trim();
+    if (value.isEmpty) return value;
+
+    // Remove any user-typed scheme like https:, http://, ftp://, mailto:, tel:, sms:, etc.
+    return value.replaceFirst(RegExp(r'^[a-zA-Z][a-zA-Z0-9+\.-]*:(\/\/)?'), '');
+  }
+
   @override
   void dispose() {
     _urlController.dispose();
@@ -33,9 +41,10 @@ class _WriteUrlScreenState extends State<WriteUrlScreen> {
   }
 
   Future<void> writeToNFC() async {
-    String fullUrl = "$_selectedProtocol${_urlController.text.trim()}";
+    final cleanedInput = _stripTypedScheme(_urlController.text);
+    final fullUrl = "$_selectedProtocol$cleanedInput";
 
-    if (_urlController.text.isEmpty) {
+    if (cleanedInput.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enter URL first")));
       return;
     }
@@ -43,7 +52,7 @@ class _WriteUrlScreenState extends State<WriteUrlScreen> {
     if (widget.isAddingRecord) {
       Navigator.pop(context, {
         'type': 'URL',
-        'data': _urlController.text.trim(),
+        'data': cleanedInput,
         'fullData': fullUrl,
         'size': fullUrl.length + 1, // Basic approximation
       });
@@ -172,7 +181,7 @@ class _WriteUrlScreenState extends State<WriteUrlScreen> {
 
             // 🔍 LIVE PREVIEW
             Text(
-              'Final URI: $_selectedProtocol${_urlController.text}',
+              'Final URI: $_selectedProtocol${_stripTypedScheme(_urlController.text)}',
               style: const TextStyle(
                 color: Color(0xFF94A3B8),
                 fontSize: 13,
